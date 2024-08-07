@@ -66,6 +66,7 @@ struct whisper_params {
     bool output_jsn_full = false;
     bool output_lrc      = false;
     bool no_prints       = false;
+    bool silent          = false;
     bool print_special   = false;
     bool print_colors    = false;
     bool print_progress  = false;
@@ -74,7 +75,7 @@ struct whisper_params {
     bool use_gpu         = true;
     bool flash_attn      = false;
 
-    std::string language  = "ru";
+    std::string language  = "en";
     std::string prompt;
     std::string font_path = "/System/Library/Fonts/Supplemental/Courier New Bold.ttf";
     std::string model     = "models/ggml-base.en.bin";
@@ -125,57 +126,58 @@ static bool whisper_params_parse(int argc, char ** argv, whisper_params & params
             whisper_print_usage(argc, argv, params);
             exit(0);
         }
-        else if (arg == "-t"    || arg == "--threads")            { params.n_threads       = std::stoi(argv[++i]); }
-        else if (arg == "-p"    || arg == "--processors")         { params.n_processors    = std::stoi(argv[++i]); }
-        else if (arg == "-ot"   || arg == "--offset-t")           { params.offset_t_ms     = std::stoi(argv[++i]); }
-        else if (arg == "-on"   || arg == "--offset-n")           { params.offset_n        = std::stoi(argv[++i]); }
-        else if (arg == "-d"    || arg == "--duration")           { params.duration_ms     = std::stoi(argv[++i]); }
-        else if (arg == "-mc"   || arg == "--max-context")        { params.max_context     = std::stoi(argv[++i]); }
-        else if (arg == "-ml"   || arg == "--max-len")            { params.max_len         = std::stoi(argv[++i]); }
-        else if (arg == "-bo"   || arg == "--best-of")            { params.best_of         = std::stoi(argv[++i]); }
-        else if (arg == "-bs"   || arg == "--beam-size")          { params.beam_size       = std::stoi(argv[++i]); }
-        else if (arg == "-ac"   || arg == "--audio-ctx")          { params.audio_ctx       = std::stoi(argv[++i]); }
-        else if (arg == "-wt"   || arg == "--word-thold")         { params.word_thold      = std::stof(argv[++i]); }
-        else if (arg == "-et"   || arg == "--entropy-thold")      { params.entropy_thold   = std::stof(argv[++i]); }
-        else if (arg == "-lpt"  || arg == "--logprob-thold")      { params.logprob_thold   = std::stof(argv[++i]); }
-        else if (arg == "-tp"   || arg == "--temperature")        { params.temperature     = std::stof(argv[++i]); }
-        else if (arg == "-tpi"  || arg == "--temperature-inc")    { params.temperature_inc = std::stof(argv[++i]); }
-        else if (arg == "-debug"|| arg == "--debug-mode")         { params.debug_mode      = true; }
-        else if (arg == "-tr"   || arg == "--translate")          { params.translate       = true; }
-        else if (arg == "-di"   || arg == "--diarize")            { params.diarize         = true; }
-        else if (arg == "-tdrz" || arg == "--tinydiarize")        { params.tinydiarize     = true; }
-        else if (arg == "-sow"  || arg == "--split-on-word")      { params.split_on_word   = true; }
-        else if (arg == "-nf"   || arg == "--no-fallback")        { params.no_fallback     = true; }
-        else if (arg == "-otxt" || arg == "--output-txt")         { params.output_txt      = true; }
-        else if (arg == "-ovtt" || arg == "--output-vtt")         { params.output_vtt      = true; }
-        else if (arg == "-osrt" || arg == "--output-srt")         { params.output_srt      = true; }
-        else if (arg == "-owts" || arg == "--output-words")       { params.output_wts      = true; }
-        else if (arg == "-olrc" || arg == "--output-lrc")         { params.output_lrc      = true; }
-        else if (arg == "-fp"   || arg == "--font-path")          { params.font_path       = argv[++i]; }
-        else if (arg == "-ocsv" || arg == "--output-csv")         { params.output_csv      = true; }
-        else if (arg == "-oj"   || arg == "--output-json")        { params.output_jsn      = true; }
+        else if (arg == "-t"     || arg == "--threads")            { params.n_threads       = std::stoi(argv[++i]); }
+        else if (arg == "-p"     || arg == "--processors")         { params.n_processors    = std::stoi(argv[++i]); }
+        else if (arg == "-ot"    || arg == "--offset-t")           { params.offset_t_ms     = std::stoi(argv[++i]); }
+        else if (arg == "-on"    || arg == "--offset-n")           { params.offset_n        = std::stoi(argv[++i]); }
+        else if (arg == "-d"     || arg == "--duration")           { params.duration_ms     = std::stoi(argv[++i]); }
+        else if (arg == "-mc"    || arg == "--max-context")        { params.max_context     = std::stoi(argv[++i]); }
+        else if (arg == "-ml"    || arg == "--max-len")            { params.max_len         = std::stoi(argv[++i]); }
+        else if (arg == "-bo"    || arg == "--best-of")            { params.best_of         = std::stoi(argv[++i]); }
+        else if (arg == "-bs"    || arg == "--beam-size")          { params.beam_size       = std::stoi(argv[++i]); }
+        else if (arg == "-ac"    || arg == "--audio-ctx")          { params.audio_ctx       = std::stoi(argv[++i]); }
+        else if (arg == "-wt"    || arg == "--word-thold")         { params.word_thold      = std::stof(argv[++i]); }
+        else if (arg == "-et"    || arg == "--entropy-thold")      { params.entropy_thold   = std::stof(argv[++i]); }
+        else if (arg == "-lpt"   || arg == "--logprob-thold")      { params.logprob_thold   = std::stof(argv[++i]); }
+        else if (arg == "-tp"    || arg == "--temperature")        { params.temperature     = std::stof(argv[++i]); }
+        else if (arg == "-tpi"   || arg == "--temperature-inc")    { params.temperature_inc = std::stof(argv[++i]); }
+        else if (arg == "-debug" || arg == "--debug-mode")         { params.debug_mode      = true; }
+        else if (arg == "-tr"    || arg == "--translate")          { params.translate       = true; }
+        else if (arg == "-di"    || arg == "--diarize")            { params.diarize         = true; }
+        else if (arg == "-tdrz"  || arg == "--tinydiarize")        { params.tinydiarize     = true; }
+        else if (arg == "-sow"   || arg == "--split-on-word")      { params.split_on_word   = true; }
+        else if (arg == "-nf"    || arg == "--no-fallback")        { params.no_fallback     = true; }
+        else if (arg == "-otxt"  || arg == "--output-txt")         { params.output_txt      = true; }
+        else if (arg == "-ovtt"  || arg == "--output-vtt")         { params.output_vtt      = true; }
+        else if (arg == "-osrt"  || arg == "--output-srt")         { params.output_srt      = true; }
+        else if (arg == "-owts"  || arg == "--output-words")       { params.output_wts      = true; }
+        else if (arg == "-olrc"  || arg == "--output-lrc")         { params.output_lrc      = true; }
+        else if (arg == "-fp"    || arg == "--font-path")          { params.font_path       = argv[++i]; }
+        else if (arg == "-ocsv"  || arg == "--output-csv")         { params.output_csv      = true; }
+        else if (arg == "-oj"    || arg == "--output-json")        { params.output_jsn      = true; }
         else if (arg == "-ojstd" || arg == "--output-json-stdout") { params.output_jsnstd   = true; }
-        else if (arg == "-ojf"  || arg == "--output-json-full")   { params.output_jsn_full = params.output_jsn = true; }
-        else if (arg == "-of"   || arg == "--output-file")        { params.fname_out.emplace_back(argv[++i]); }
-        else if (arg == "-np"   || arg == "--no-prints")          { params.no_prints       = true; }
-        else if (arg == "-ps"   || arg == "--print-special")      { params.print_special   = true; }
-        else if (arg == "-pc"   || arg == "--print-colors")       { params.print_colors    = true; }
-        else if (arg == "-pp"   || arg == "--print-progress")     { params.print_progress  = true; }
-        else if (arg == "-nt"   || arg == "--no-timestamps")      { params.no_timestamps   = true; }
-        else if (arg == "-l"    || arg == "--language")           { params.language        = whisper_param_turn_lowercase(argv[++i]); }
-        else if (arg == "-dl"   || arg == "--detect-language")    { params.detect_language = true; }
-        else if (                  arg == "--prompt")             { params.prompt          = argv[++i]; }
-        else if (arg == "-m"    || arg == "--model")              { params.model           = argv[++i]; }
-        else if (arg == "-f"    || arg == "--file")               { params.fname_inp.emplace_back(argv[++i]); }
-        else if (arg == "-oved" || arg == "--ov-e-device")        { params.openvino_encode_device = argv[++i]; }
-        else if (arg == "-dtw"  || arg == "--dtw")                { params.dtw             = argv[++i]; }
-        else if (arg == "-ls"   || arg == "--log-score")          { params.log_score       = true; }
-        else if (arg == "-ng"   || arg == "--no-gpu")             { params.use_gpu         = false; }
-        else if (arg == "-fa"   || arg == "--flash-attn")         { params.flash_attn      = true; }
-        else if (                  arg == "--suppress-regex")     { params.suppress_regex  = argv[++i]; }
-        else if (                  arg == "--grammar")            { params.grammar         = argv[++i]; }
-        else if (                  arg == "--grammar-rule")       { params.grammar_rule    = argv[++i]; }
-        else if (                  arg == "--grammar-penalty")    { params.grammar_penalty = std::stof(argv[++i]); }
+        else if (arg == "-ojf"   || arg == "--output-json-full")   { params.output_jsn_full = params.output_jsn = true; }
+        else if (arg == "-of"    || arg == "--output-file")        { params.fname_out.emplace_back(argv[++i]); }
+        else if (arg == "-np"    || arg == "--no-prints")          { params.no_prints       = true; }
+        else if (arg == "-s"     || arg == "--silent")             { params.silent          = true; }
+        else if (arg == "-ps"    || arg == "--print-special")      { params.print_special   = true; }
+        else if (arg == "-pc"    || arg == "--print-colors")       { params.print_colors    = true; }
+        else if (arg == "-pp"    || arg == "--print-progress")     { params.print_progress  = true; }
+        else if (arg == "-nt"    || arg == "--no-timestamps")      { params.no_timestamps   = true; }
+        else if (arg == "-l"     || arg == "--language")           { params.language        = whisper_param_turn_lowercase(argv[++i]); }
+        else if (arg == "-dl"    || arg == "--detect-language")    { params.detect_language = true; }
+        else if (                   arg == "--prompt")             { params.prompt          = argv[++i]; }
+        else if (arg == "-m"     || arg == "--model")              { params.model           = argv[++i]; }
+        else if (arg == "-f"     || arg == "--file")               { params.fname_inp.emplace_back(argv[++i]); }
+        else if (arg == "-oved"  || arg == "--ov-e-device")        { params.openvino_encode_device = argv[++i]; }
+        else if (arg == "-dtw"   || arg == "--dtw")                { params.dtw             = argv[++i]; }
+        else if (arg == "-ls"    || arg == "--log-score")          { params.log_score       = true; }
+        else if (arg == "-ng"    || arg == "--no-gpu")             { params.use_gpu         = false; }
+        else if (arg == "-fa"    || arg == "--flash-attn")         { params.flash_attn      = true; }
+        else if (                   arg == "--suppress-regex")     { params.suppress_regex  = argv[++i]; }
+        else if (                   arg == "--grammar")            { params.grammar         = argv[++i]; }
+        else if (                   arg == "--grammar-rule")       { params.grammar_rule    = argv[++i]; }
+        else if (                   arg == "--grammar-penalty")    { params.grammar_penalty = std::stof(argv[++i]); }
         else {
             fprintf(stderr, "error: unknown argument: %s\n", arg.c_str());
             whisper_print_usage(argc, argv, params);
@@ -221,9 +223,10 @@ static void whisper_print_usage(int /*argc*/, char ** argv, const whisper_params
     fprintf(stderr, "  -fp,       --font-path          [%-7s] path to a monospace font for karaoke video\n",     params.font_path.c_str());
     fprintf(stderr, "  -ocsv,     --output-csv         [%-7s] output result in a CSV file\n",                    params.output_csv ? "true" : "false");
     fprintf(stderr, "  -oj,       --output-json        [%-7s] output result in a JSON file\n",                   params.output_jsn ? "true" : "false");
-    fprintf(stderr, "  -ojstd     --output-json-stdout [%-7s] output result as JSON in file\n",                 params.output_jsnstd ? "true" : "false");
+    fprintf(stderr, "  -ojstd     --output-json-stdout [%-7s] output result as JSON in file\n",                  params.output_jsnstd ? "true" : "false");
     fprintf(stderr, "  -ojf,      --output-json-full   [%-7s] include more information in the JSON file\n",      params.output_jsn_full ? "true" : "false");
     fprintf(stderr, "  -of FNAME, --output-file FNAME  [%-7s] output file path (without file extension)\n",      "");
+    fprintf(stderr, "  -s,        --silent             [%-7s] silent mode (no output to stdout)",                params.silent ? "true" : "false");
     fprintf(stderr, "  -np,       --no-prints          [%-7s] do not print anything other than the results\n",   params.no_prints ? "true" : "false");
     fprintf(stderr, "  -ps,       --print-special      [%-7s] print special tokens\n",                           params.print_special ? "true" : "false");
     fprintf(stderr, "  -pc,       --print-colors       [%-7s] print colors\n",                                   params.print_colors ? "true" : "false");
@@ -294,6 +297,8 @@ static void whisper_print_progress_callback(struct whisper_context * /*ctx*/, st
         fprintf(stderr, "%s: progress = %3d%%\n", __func__, progress);
     }
 }
+
+static void whisper_silent_segment_callback(struct whisper_context * ctx, struct whisper_state * /*state*/, int n_new, void * user_data) { }
 
 static void whisper_print_segment_callback(struct whisper_context * ctx, struct whisper_state * /*state*/, int n_new, void * user_data) {
     const auto & params  = *((whisper_print_user_data *) user_data)->params;
@@ -1159,7 +1164,12 @@ int main(int argc, char ** argv) {
 
             // this callback is called on each new segment
             if (!wparams.print_realtime) {
-                wparams.new_segment_callback           = whisper_print_segment_callback;
+                if (params.silent) {
+                    wparams.new_segment_callback = whisper_silent_segment_callback;
+                } else {
+                    wparams.new_segment_callback = whisper_print_segment_callback;
+                }
+
                 wparams.new_segment_callback_user_data = &user_data;
             }
 
